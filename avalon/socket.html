@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WebSocket Client</title>
+</head>
+<body>
+  <input type="text" id="messageInput" placeholder="Type your message">
+  <button onclick="sendMessage()">Send</button>
+  <div id="messageOutput"></div>
+  
+  <script>
+    const roomCode = "asdf"; // Replace "yourRoomCode" with the actual room code
+    const ws = new WebSocket(`ws://localhost:8080/avalon/ws?roomCode=${roomCode}`);
+
+    ws.onopen = function() {
+      console.log("WebSocket connected.");
+    };
+
+    ws.onmessage = function(event) {
+      console.log("Received message from server:", event.data);
+      printMessage("Server: " + event.data); // Print the received message
+    };
+
+    ws.onclose = function() {
+      console.log("WebSocket closed.");
+    };
+
+    ws.onerror = function(event) {
+      console.error("WebSocket error:", event);
+    };
+
+    function sendMessage() {
+      const messageInput = document.getElementById("messageInput");
+      const message = messageInput.value;
+      if (message.trim() !== "") {
+        ws.send(message);
+        messageInput.value = ""; // Clear the input field after sending
+        printMessage("You: " + message); // Print the sent message
+      }
+    }
+
+    function printMessage(message) {
+      const messageOutput = document.getElementById("messageOutput");
+      const messageElement = document.createElement("div");
+      messageElement.textContent = message;
+      messageOutput.appendChild(messageElement);
+    }
+
+    const messageInput = document.getElementById("messageInput");
+    messageInput.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // Prevent default "Enter" behavior (e.g., form submission)
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>

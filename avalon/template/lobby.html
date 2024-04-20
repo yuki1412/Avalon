@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avalon World</title>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.5"
+      integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="/images/title_img.ico" type="image/x-icon">
+  </head>
+  <body class="bg-gray-800 flex justify-center items-center min-h-screen">
+    <div id="snackbar">Some text some message..</div>
+    <div class="content">
+      <p id="role-details" class="mb-5 self-start">Welcome to Avalon World</p>
+      <form class="flex flex-col items-center w-500 space-y-5">
+        <div>
+          <span class="pr-4">Username</span>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            class="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          />
+        </div>
+        <div>
+          <span class="pr-4">Room Code</span>
+          <input
+            type="text"
+            name="room_code"
+            id="room_code"
+            class="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          />
+        </div>
+        <div>
+          <button
+            onclick="createRoom()"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            hx-post="api/create-room"
+            hx-target=".content"
+            hx-swap="innerHTML"
+            hx-headers='{"Content-Type": "application/json"}'
+            id="create-room-form"
+          >
+            Create Room
+          </button>
+          <button
+            onclick="joinRoom()"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            hx-post="api/join-room"
+            hx-target=".content"
+            hx-swap="innerHTML"
+            hx-headers='{"Content-Type": "application/json"}'
+            id="create-room-form"
+          >
+            Join Room
+          </button>
+        </div>
+      </form>
+    </div>
+    <script>
+      const createRoom = () => {
+        setCookie();
+        initWebSocket()
+        callapi("api/create-room");
+      };
+      const joinRoom = async () => {
+        setCookie();
+        initWebSocket()
+        callapi("api/join-room");
+      };
+
+      const callapi = async (path) => {
+        await fetch(path, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: document.getElementById("username").value,
+            room_code: document.getElementById("room_code").value,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Success:", data);
+            // Add your success handling here if needed
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            toastPush(error.message);
+          });
+      };
+      function setCookie() {
+        var usernameInput = document.getElementById("username").value;
+        var roomCodeInput = document.getElementById("room_code").value;
+        // Calculate expiration date (1 day from now)
+        var expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 1);
+        document.cookie =
+          "username=" +
+          usernameInput +
+          "; expires=" +
+          expirationDate.toUTCString() +
+          "; path=/";
+
+        document.cookie =
+          "room_code=" +
+          roomCodeInput +
+          "; expires=" +
+          expirationDate.toUTCString() +
+          "; path=/";
+      }
+      function getCookieValue(cookieName) {
+        var name = cookieName + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var cookieArray = decodedCookie.split(";");
+        for (var i = 0; i < cookieArray.length; i++) {
+          var cookie = cookieArray[i].trim();
+          if (cookie.indexOf(name) == 0) {
+            return cookie.substring(name.length, cookie.length);
+          }
+        }
+        return null;
+      }
+      function init() {
+        var usernameInput = document.getElementById("username");
+        // Check if the username cookie exists
+        var usernameCookie = getCookieValue("username");
+        if (usernameCookie !== null) {
+          usernameInput.value = usernameCookie;
+        }
+        var roomCodeInput = document.getElementById("room_code");
+        // Check if the roomCode cookie exists
+        var roomCodeCookie = getCookieValue("room_code");
+        if (roomCodeCookie !== null) {
+          roomCodeInput.value = roomCodeCookie;
+        }
+      }
+      init();
+      function toastPush(message) {
+        var x = document.getElementById("snackbar");
+        x.innerHTML = message;
+        x.className = "show";
+        setTimeout(function () {
+          x.className = x.className.replace("show", "");
+        }, 3000);
+      }
+
+      document.addEventListener("htmx:afterRequest", function (event) {
+        var form = document.getElementById("myForm");
+        if (event.detail.xhr.responseURL === form.getAttribute("hx-post")) {
+          // This event is triggered after the form submission request
+          console.log("Form submission request sent");
+        }
+      });
+
+      document.addEventListener("htmx:afterSwap", function (event) {
+        var form = document.getElementById("myForm");
+        if (event.target === form) {
+          // This event is triggered after HTMX swaps content
+          var successMessage = document.getElementById("successMessage");
+          var errorMessage = document.getElementById("errorMessage");
+
+          if (event.detail.xhr.status === 200) {
+            // Display success message
+            successMessage.style.display = "block";
+            errorMessage.style.display = "none";
+          } else {
+            // Display error message
+            successMessage.style.display = "none";
+            errorMessage.style.display = "block";
+          }
+        }
+      });
+
+      const initWebSocket = () => {
+        const ws = new WebSocket(
+          `ws://localhost:8080/avalon/ws?roomCode=${roomCodeInput.value}`
+        );
+
+        ws.onopen = function () {
+          console.log("WebSocket connected.");
+          ws.send("Hello, server!");
+        };
+
+        ws.onmessage = function (event) {
+          console.log("Received message from server:", event.data);
+        };
+
+        ws.onclose = function () {
+          console.log("WebSocket closed.");
+        };
+
+        ws.onerror = function (event) {
+          console.error("WebSocket error:", event);
+        };
+      };
+    </script>
+  </body>
+</html>
+<style>
+  span,
+  p,
+  button {
+    color: whitesmoke;
+  }
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .content p {
+    margin-top: 20px;
+    font-size: 1.5em;
+  }
+
+  #snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+  }
+
+  #snackbar.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  }
+
+  @-webkit-keyframes fadein {
+    from {
+      bottom: 0;
+      opacity: 0;
+    }
+    to {
+      bottom: 30px;
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadein {
+    from {
+      bottom: 0;
+      opacity: 0;
+    }
+    to {
+      bottom: 30px;
+      opacity: 1;
+    }
+  }
+
+  @-webkit-keyframes fadeout {
+    from {
+      bottom: 30px;
+      opacity: 1;
+    }
+    to {
+      bottom: 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes fadeout {
+    from {
+      bottom: 30px;
+      opacity: 1;
+    }
+    to {
+      bottom: 0;
+      opacity: 0;
+    }
+  }
+</style>

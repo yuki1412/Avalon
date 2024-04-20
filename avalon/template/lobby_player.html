@@ -1,0 +1,12 @@
+<div class="bg-gray-800 text-white p-4">
+  <h1 class="text-2xl font-bold mb-4">Usernames List</h1>
+  <ul class="divide-y divide-gray-700">
+    {{range .username_list}}
+      {{ if eq . $.host_name}}
+        <li class="py-2">{{.}} (Host)</li>
+      {{ else }}
+        <li class="py-2">{{.}}</li>
+      {{ end }}
+    {{end}}
+  </ul>
+</div>
