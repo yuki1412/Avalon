@@ -3,190 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <title>WebSocket Client</title> -->
-    <title>Client</title>
+    <title>Game Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
             background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
+            margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-entry {
+            text-align: center;
+            padding: 40px;
+            background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .control-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .control-buttons button {
-            flex: 1;
-        }
-        .vote-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .vote-buttons button {
-            flex: 1;
-        }
-        .vote-buttons button.true {
-            background-color: #4CAF50;
-        }
-        .vote-buttons button.false {
-            background-color: #f44336;
-        }
-        textarea {
             width: 100%;
-            height: 100px;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
+            max-width: 400px;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .response-container {
-            margin-top: 20px;
-            display: flex;
-            gap: 20px;
-        }
-        .response-box {
-            flex: 1;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            height: 400px;
-            overflow-y: auto;
-        }
-        .response-box h3 {
-            margin-top: 0;
+
+        .login-entry h2 {
             color: #333;
-            position: sticky;
-            top: 0;
-            background-color: #f8f9fa;
-            padding: 10px 0;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 30px;
         }
-        .clear-button {
-            background-color: #dc3545;
+
+        .login-entry input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .login-entry button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #4CAF50;
             color: white;
-            padding: 5px 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.8em;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
-        .clear-button:hover {
-            background-color: #c82333;
-        }
-        .message-row {
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-        }
-        .message-row:last-child {
-            margin-bottom: 0;
-        }
-        pre {
-            margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        .status {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .status-info {
-            background-color: #e3f2fd;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .status-info h3 {
-            margin-top: 0;
-            color: #1976d2;
-        }
-        .status-info p {
-            margin: 5px 0;
-            font-family: monospace;
-        }
-        .client-list {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        .client-list h4 {
-            margin: 0 0 10px 0;
-            color: #1976d2;
-        }
-        .client-item {
-            padding: 5px 10px;
-            margin: 2px 0;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            font-family: monospace;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .client-item:hover {
-            background-color: #e9ecef;
-        }
-        .client-item.selected {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .client-item.selected:hover {
+
+        .login-entry button:hover {
             background-color: #45a049;
         }
-        .mission-status {
-            display: flex;
-            gap: 5px;
+
+        .status {
             margin-top: 10px;
-        }
-        .mission-vote {
-            padding: 5px 10px;
+            padding: 10px;
             border-radius: 4px;
-            font-weight: bold;
+            text-align: center;
         }
-        .mission-vote.true {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .mission-vote.false {
-            background-color: #f44336;
-            color: white;
-        }
+
         .connected {
             background-color: #d4edda;
             color: #155724;
         }
+
         .disconnected {
             background-color: #f8d7da;
             color: #721c24;
@@ -194,239 +77,50 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>WebSocket Client</h1>
+    <div class="login-entry" id="loginEntry">
+        <h2>Enter Username</h2>
+        <input type="text" id="username" placeholder="Enter your username" required>
+        <button onclick="joinGame()">Enter Game</button>
         <div id="connectionStatus" class="status disconnected">Disconnected</div>
-        
-        <div class="input-group">
-            <h3>Payload Content</h3>
-            <textarea id="messageInput" placeholder="Enter your message here..."></textarea>
-            <button onclick="sendMessage()">Send Message</button>
-        </div>
-
-        <div class="status-info">
-            <h3>Information</h3>
-            <p>Connected Clients: <span id="clientCount">0</span></p>
-            <p>Status: <span id="gameStatus">-</span></p>
-            <p>Global Status: <span id="globalStatus">-</span></p>
-            <p>Mission: </p><div class="mission-status" id="missionStatus">
-                <!-- Mission votes will be displayed here -->
-            </div>
-            <div class="client-list">
-                <h4>Connected Clients</h4>
-                <div id="clientList">
-                    <!-- Client list will be displayed here -->
-                </div>
-            </div>
-        </div>
-
-        <div class="control-buttons">
-            <button onclick="sendControl('start')">Start</button>
-            <button onclick="sendControl('stop')">Stop</button>
-        </div>
-
-        <div class="vote-buttons">
-            <button class="true" onclick="sendVote(true)">Vote True</button>
-            <button class="false" onclick="sendVote(false)">Vote False</button>
-        </div>
-
-        <div class="response-container">
-            <div class="response-box">
-                <h3>Message Sent</h3>
-                <div id="messageSent"></div>
-            </div>
-            <div class="response-box">
-                <h3>Response Received <button class="clear-button" onclick="clearResponses()">Clear</button></h3>
-                <div id="responseReceived"></div>
-            </div>
-        </div>
     </div>
 
     <script>
         let ws;
         const statusDiv = document.getElementById('connectionStatus');
-        const messageInput = document.getElementById('messageInput');
-        const messageSent = document.getElementById('messageSent');
-        const responseReceived = document.getElementById('responseReceived');
+        let currentUsername = '';
 
-        const responseBoxes = document.querySelectorAll('.response-box');
-
-        function addMessageRow(container, message) {
-            // Handle different types of messages
-            switch (true) {
-                case message.includes('clientList;'):
-                    updateClientList(message);
-                    break;
-                case message.includes('Number of Connected Clients:'):
-                    const row = document.createElement('div');
-                    row.className = 'message-row';
-                    const pre = document.createElement('pre');
-                    pre.textContent = message;
-                    row.appendChild(pre);
-                    container.appendChild(row);
-                    updateStatusInfo(message);
-                    // Use a more reliable way to scroll to bottom
-                    const scrollToBottom = () => {
-                        container.scrollTop  = container.scrollHeight;
-                    };
-        
-                    responseBoxes.forEach(element => {
-                        element.scrollTop = element.scrollHeight; 
-                    });
-                    window.scrollTo(0, document.body.scrollHeight);
-                    break;
+        function joinGame() {
+            const usernameInput = document.getElementById('username');
+            
+            if (!usernameInput.value.trim()) {
+                alert('Please enter a username');
+                return;
             }
             
+            currentUsername = usernameInput.value.trim();
+            connectToGame();
         }
 
-        function updateStatusInfo(message) {
-            // Parse client count
-            const clientCountMatch = message.match(/Number of Connected Clients: (\d+)/);
-            if (clientCountMatch) {
-                document.getElementById('clientCount').textContent = clientCountMatch[1];
-            }
-
-            // Parse status
-            const statusMatch = message.match(/Status:(\w+)/);
-            if (statusMatch) {
-                document.getElementById('gameStatus').textContent = statusMatch[1];
-            }
-
-            // Parse global status
-            const globalStatusMatch = message.match(/GStatus:(\w+)/);
-            if (globalStatusMatch) {
-                document.getElementById('globalStatus').textContent = globalStatusMatch[1];
-            }
-
-            // Parse mission votes
-            const missionMatch = message.match(/Mission \[(.*?)\]/);
-            if (missionMatch) {
-                const votes = missionMatch[1].split(' ');
-                const missionStatus = document.getElementById('missionStatus');
-                missionStatus.innerHTML = ''; // Clear existing votes
-                
-                votes.forEach(vote => {
-                    if (vote === 'true' || vote === 'false') {
-                        const voteElement = document.createElement('div');
-                        voteElement.className = `mission-vote ${vote}`;
-                        voteElement.textContent = vote;
-                        missionStatus.appendChild(voteElement);
-                    }
-                });
-            }
-        }
-
-        function updateClientList(message) {
-            // Parse client list
-            const clientListMatch = message.match(/clientList;(.*)/);
-            if (clientListMatch) {
-                const clientList = clientListMatch[1].split(';');
-                const clientListContainer = document.getElementById('clientList');
-                clientListContainer.innerHTML = ''; // Clear existing list
-
-                console.log("clientList", clientList);
-                
-                for (let i = 0; i < clientList.length; i += 2) {
-                    const clientId = clientList[i];
-                    const isSelected = clientList[i + 1] === 'true';
-
-                    console.log("clientId", clientId, "isSelected", isSelected);
-                    
-                    if (clientId.trim()) {
-                        const clientElement = document.createElement('div');
-                        clientElement.className = `client-item ${isSelected ? 'selected' : ''}`;
-                        clientElement.textContent = clientId;
-                        clientElement.addEventListener('click', () => {
-                            selectClient(clientId);
-                        });
-                        clientListContainer.appendChild(clientElement);
-                    }
-                }
-            }
-        }
-
-        function connect() {
-            ws = new WebSocket('ws://localhost:8080/ws');
-
+        function connectToGame() {
+            ws = new WebSocket(`ws://localhost:8080/ws?username=${currentUsername}`);
+            
             ws.onopen = function() {
-                statusDiv.textContent = 'Connected';
+                statusDiv.textContent = 'Connected as: ' + currentUsername;
                 statusDiv.className = 'status connected';
             };
 
             ws.onclose = function() {
                 statusDiv.textContent = 'Disconnected';
                 statusDiv.className = 'status disconnected';
-                // Try to reconnect after 5 seconds
-                setTimeout(connect, 5000);
-            };
-
-            ws.onmessage = function(event) {
-                addMessageRow(responseReceived, event.data);
+                setTimeout(connectToGame, 5000);
             };
 
             ws.onerror = function(error) {
                 console.error('WebSocket error:', error);
-                statusDiv.textContent = 'Error occurred';
+                statusDiv.textContent = 'Connection Error';
                 statusDiv.className = 'status disconnected';
             };
         }
-
-        function sendMessage() {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = messageInput.value;
-                if (message.trim()) {
-                    ws.send(message);
-                    addMessageRow(messageSent, message);
-                    messageInput.value = '';
-                }
-            } else {
-                alert('WebSocket is not connected. Please wait for connection...');
-            }
-        }
-
-        function sendControl(action) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(action);
-                addMessageRow(messageSent, `Control: ${action}`);
-            } else {
-                alert('WebSocket is not connected. Please wait for connection...');
-            }
-        }
-
-        function sendVote(vote) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = `vote;${vote}`;
-                ws.send(message);
-                addMessageRow(messageSent, `Vote: ${vote}`);
-            } else {
-                alert('WebSocket is not connected. Please wait for connection...');
-            }
-        }
-
-        function selectClient(client) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(`select;${client}`);
-                addMessageRow(messageSent, `Selected Client: ${client}`);
-            } else {
-                alert('WebSocket is not connected. Please wait for connection...');
-            }
-        }
-
-        function clearResponses() {
-            const responseReceived = document.getElementById('responseReceived');
-            responseReceived.innerHTML = '';
-        }
-
-        // Add enter key support for sending messages
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // Connect when the page loads
-        connect();
     </script>
 </body>
-</html> 
+</html>
