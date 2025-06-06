@@ -7,120 +7,146 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
+            max-width: 500px;
+            margin: 0 auto;
             padding: 20px;
+            background-color: #f5f5f5;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
-
-        .login-entry {
-            text-align: center;
+        .login-container {
+            background-color: white;
             padding: 40px;
-            background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
             width: 100%;
-            max-width: 400px;
         }
-
-        .login-entry h2 {
+        h1 {
             color: #333;
             margin-bottom: 30px;
         }
-
-        .login-entry input {
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"] {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
+            border: 2px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
             box-sizing: border-box;
         }
-
-        .login-entry button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
             background-color: #4CAF50;
             color: white;
+            padding: 12px 30px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            width: 100%;
         }
-
-        .login-entry button:hover {
+        button:hover {
             background-color: #45a049;
         }
-
-        .status {
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #e74c3c;
             margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .connected {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .disconnected {
-            background-color: #f8d7da;
-            color: #721c24;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="login-entry" id="loginEntry">
-        <h2>Enter Username</h2>
-        <input type="text" id="username" placeholder="Enter your username" required>
-        <button onclick="joinGame()">Enter Game</button>
-        <div id="connectionStatus" class="status disconnected">Disconnected</div>
+    <div class="login-container">
+        <h1>Welcome to Game</h1>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Enter your username:</label>
+                <input type="text" id="username" name="username" placeholder="Your username" required>
+            </div>
+            <button type="submit" id="joinButton">Join Game</button>
+            <div id="error" class="error" style="display: none;"></div>
+        </form>
     </div>
 
     <script>
-        let ws;
-        const statusDiv = document.getElementById('connectionStatus');
-        let currentUsername = '';
+        const form = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const joinButton = document.getElementById('joinButton');
+        const errorDiv = document.getElementById('error');
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            errorDiv.style.display = 'none';
+        }
 
         function joinGame() {
-            const usernameInput = document.getElementById('username');
+            const username = usernameInput.value.trim();
             
-            if (!usernameInput.value.trim()) {
-                alert('Please enter a username');
+            if (!username) {
+                showError('Please enter a username');
                 return;
             }
+
+            if (username.length < 2) {
+                showError('Username must be at least 2 characters long');
+                return;
+            }
+
+            if (username.length > 20) {
+                showError('Username must be less than 20 characters');
+                return;
+            }
+
+            // Store username in localStorage
+            localStorage.setItem('gameUsername', username);
             
-            currentUsername = usernameInput.value.trim();
-            connectToGame();
+            // Clear any existing userID to ensure fresh login
+            localStorage.removeItem('gameUserID');
+            
+            // Navigate to game.html
+            window.location.href = 'game.html';
         }
 
-        function connectToGame() {
-            ws = new WebSocket(`ws://localhost:8080/ws?username=${currentUsername}`);
-            
-            ws.onopen = function() {
-                statusDiv.textContent = 'Connected as: ' + currentUsername;
-                statusDiv.className = 'status connected';
-            };
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            hideError();
+            joinGame();
+        });
 
-            ws.onclose = function() {
-                statusDiv.textContent = 'Disconnected';
-                statusDiv.className = 'status disconnected';
-                setTimeout(connectToGame, 5000);
-            };
+        // Allow Enter key to submit
+        usernameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                joinGame();
+            }
+        });
 
-            ws.onerror = function(error) {
-                console.error('WebSocket error:', error);
-                statusDiv.textContent = 'Connection Error';
-                statusDiv.className = 'status disconnected';
-            };
-        }
+        // Focus on username input when page loads
+        window.addEventListener('load', function() {
+            usernameInput.focus();
+        });
     </script>
 </body>
 </html>

@@ -7,7 +7,7 @@ import (
 	"playground/models"
 )
 
-var roundClient models.RoundClient = *models.RoundClientInit([]uint32{})
+var roundClient models.ClientVar = *models.ClientVarInit([]uint32{})
 
 func main() {
 	http.HandleFunc("/ws", roundClient.HandleConnection)

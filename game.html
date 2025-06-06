@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .username {
+            font-weight: bold;
+            color: #333;
+        }
+        .leave-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .leave-btn:hover {
+            background-color: #c0392b;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .control-buttons button {
+            flex: 1;
+        }
+        .vote-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .vote-buttons button {
+            flex: 1;
+        }
+        .vote-buttons button.true {
+            background-color: #4CAF50;
+        }
+        .vote-buttons button.false {
+            background-color: #f44336;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .response-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        .response-box {
+            flex: 1;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .response-box h3 {
+            margin-top: 0;
+            color: #333;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .clear-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .clear-button:hover {
+            background-color: #c82333;
+        }
+        .message-row {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        .message-row:last-child {
+            margin-bottom: 0;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .status {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status-info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .status-info h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .status-info p {
+            margin: 5px 0;
+            font-family: monospace;
+        }
+        .client-list {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .client-list h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .client-item {
+            padding: 5px 10px;
+            margin: 2px 0;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .client-item:hover {
+            background-color: #e9ecef;
+        }
+        .client-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .client-item.selected:hover {
+            background-color: #45a049;
+        }
+        .mission-status {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .mission-vote {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .mission-vote.true {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .mission-vote.false {
+            background-color: #f44336;
+            color: white;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="username" id="usernameDisplay">Welcome, Player</div>
+        <a href="index.html" class="leave-btn">Leave Game</a>
+    </div>
+
+    <div class="container">
+        <div id="connectionStatus" class="status disconnected">Disconnected</div>
+        
+        <div class="input-group">
+            <h3>Send Message</h3>
+            <textarea id="messageInput" placeholder="Enter your message here..."></textarea>
+            <button onclick="sendMessage()">Send Message</button>
+        </div>
+
+        <div class="status-info">
+            <h3>Information</h3>
+            <p>Players: <span id="clientCount">0</span></p>
+            <p>Status: <span id="gameStatus">-</span></p>
+            <p>Global Status: <span id="globalStatus">-</span></p>
+            <p>Round: <span id="currentRound">-</span></p>
+            <p>Round Assigner: <span id="roundAssigner">-</span></p>
+            <p>Mission: </p><div class="mission-status" id="missionStatus">
+                <!-- Mission votes will be displayed here -->
+            </div>
+            <div class="client-list">
+                <h4>Players</h4>
+                <div id="clientList">
+                    <!-- Client list will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="control-buttons">
+            <button onclick="sendControl('start')">Start</button>
+            <button onclick="sendControl('stop')">Stop</button>
+        </div>
+
+        <div class="vote-buttons">
+            <button class="true" onclick="sendVote(true)">Vote True</button>
+            <button class="false" onclick="sendVote(false)">Vote False</button>
+        </div>
+
+        <div class="response-container">
+            <div class="response-box">
+                <h3>Message Sent</h3>
+                <div id="messageSent"></div>
+            </div>
+            <div class="response-box">
+                <h3>Response Received <button class="clear-button" onclick="clearResponses()">Clear</button></h3>
+                <div id="responseReceived"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        let username;
+        let userID;
+        let connID;
+        const statusDiv = document.getElementById('connectionStatus');
+        const messageInput = document.getElementById('messageInput');
+        const messageSent = document.getElementById('messageSent');
+        const responseReceived = document.getElementById('responseReceived');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+
+        // Get username from localStorage
+        username = localStorage.getItem('gameUsername');
+        userID = localStorage.getItem('gameUserID');
+        
+        // If no username, redirect back to login
+        if (!username) {
+            window.location.href = 'index.html';
+        } else {
+            usernameDisplay.textContent = `Welcome, ${username}`;
+        }
+
+        function addMessageRow(container, message) {
+            // Handle user ID message from server
+            if (message.startsWith('userID:')) {
+                handleUserIDMessage(message);
+                return;
+            }
+
+            // Handle different types of messages
+            switch (true) {
+                case message.includes('clientList;'):
+                    updateClientList(message);
+                    break;
+                case message.includes('Number of Players:'):
+                    updateStatusInfo(message);
+                    // Also add to response area for visibility
+                    const statusRow = document.createElement('div');
+                    statusRow.className = 'message-row';
+                    const statusPre = document.createElement('pre');
+                    statusPre.textContent = message;
+                    statusRow.appendChild(statusPre);
+                    container.appendChild(statusRow);
+                    container.scrollTop = container.scrollHeight;
+                    break;
+                default:
+                    // Regular message
+                    const messageRow = document.createElement('div');
+                    messageRow.className = 'message-row';
+                    const messagePre = document.createElement('pre');
+                    messagePre.textContent = message;
+                    messageRow.appendChild(messagePre);
+                    container.appendChild(messageRow);
+                    container.scrollTop = container.scrollHeight;
+                    break;
+            }
+        }
+
+        function handleUserIDMessage(message) {
+            // Parse: userID:abc123;reconnection:true (simplified format)
+            const parts = message.split(';');
+            const userIDPart = parts[0].split(':')[1];
+            const isReconnection = parts[1].split(':')[1] === 'true';
+
+            userID = userIDPart;
+
+            // Store user ID in localStorage for future reconnections
+            localStorage.setItem('gameUserID', userID);
+
+            // Update display
+            const connectionType = isReconnection ? 'Reconnected' : 'Connected';
+            statusDiv.textContent = `${connectionType} as: ${username} (ID: ${userID.substring(0, 8)}...)`;
+            statusDiv.className = 'status connected';
+
+            // Add welcome message to response area
+            const welcomeMessage = `${connectionType} with User ID: ${userID.substring(0, 8)}...`;
+            addMessageRow(responseReceived, welcomeMessage);
+
+            console.log(`User ${connectionType}:`, { userID, username, isReconnection });
+        }
+
+        function updateStatusInfo(message) {
+            // Parse client count
+            const clientCountMatch = message.match(/Number of Players: (\d+)/);
+            if (clientCountMatch) {
+                document.getElementById('clientCount').textContent = clientCountMatch[1];
+            }
+
+            // Parse status
+            const statusMatch = message.match(/Status:(\w+)/);
+            if (statusMatch) {
+                document.getElementById('gameStatus').textContent = statusMatch[1];
+            }
+
+            // Parse global status
+            const globalStatusMatch = message.match(/GStatus:(\w+)/);
+            if (globalStatusMatch) {
+                document.getElementById('globalStatus').textContent = globalStatusMatch[1];
+            }
+
+            // Parse round information
+            const roundMatch = message.match(/Round:(\d+)/);
+            if (roundMatch) {
+                document.getElementById('currentRound').textContent = roundMatch[1];
+            }
+
+            // Parse round assigner
+            const assignerMatch = message.match(/Round Assigner:(\d+)/);
+            if (assignerMatch) {
+                document.getElementById('roundAssigner').textContent = assignerMatch[1];
+            }
+
+            // Parse mission votes
+            const missionMatch = message.match(/Mission \[(.*?)\]/);
+            if (missionMatch) {
+                const votes = missionMatch[1].split(' ');
+                const missionStatus = document.getElementById('missionStatus');
+                missionStatus.innerHTML = ''; // Clear existing votes
+                
+                votes.forEach(vote => {
+                    if (vote === 'true' || vote === 'false') {
+                        const voteElement = document.createElement('div');
+                        voteElement.className = `mission-vote ${vote}`;
+                        voteElement.textContent = vote;
+                        missionStatus.appendChild(voteElement);
+                    }
+                });
+            }
+        }
+
+        function updateClientList(message) {
+            // Parse client list
+            const clientListMatch = message.match(/clientList;(.*)/);
+            if (clientListMatch) {
+                const clientList = clientListMatch[1].split(';');
+                const clientListContainer = document.getElementById('clientList');
+                clientListContainer.innerHTML = ''; // Clear existing list
+
+                console.log("clientList", clientList);
+                
+                for (let i = 0; i < clientList.length; i += 2) {
+                    const clientId = clientList[i];
+                    const isSelected = clientList[i + 1] === 'true';
+
+                    console.log("clientId", clientId, "isSelected", isSelected);
+                    
+                    if (clientId.trim()) {
+                        const clientElement = document.createElement('div');
+                        clientElement.className = `client-item ${isSelected ? 'selected' : ''}`;
+                        clientElement.textContent = clientId;
+                        clientElement.addEventListener('click', () => {
+                            selectClient(clientId);
+                        });
+                        clientListContainer.appendChild(clientElement);
+                    }
+                }
+            }
+        }
+
+        function connect() {
+            // Build WebSocket URL with username and userID (if available)
+            let wsUrl = `ws://localhost:8080/ws?username=${encodeURIComponent(username)}`;
+            if (userID) {
+                wsUrl += `&userID=${encodeURIComponent(userID)}`;
+            }
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                statusDiv.textContent = `Connecting as: ${username}...`;
+                statusDiv.className = 'status connected';
+            };
+
+            ws.onclose = function() {
+                statusDiv.textContent = 'Disconnected - Attempting to reconnect...';
+                statusDiv.className = 'status disconnected';
+                // Try to reconnect after 3 seconds
+                setTimeout(connect, 3000);
+            };
+
+            ws.onmessage = function(event) {
+                addMessageRow(responseReceived, event.data);
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                statusDiv.textContent = 'Connection Error - Retrying...';
+                statusDiv.className = 'status disconnected';
+            };
+        }
+
+        function sendMessage() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = messageInput.value;
+                if (message.trim()) {
+                    ws.send(message);
+                    addMessageRow(messageSent, message);
+                    messageInput.value = '';
+                }
+            } else {
+                alert('WebSocket is not connected. Please wait for connection...');
+            }
+        }
+
+        function sendControl(action) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(action);
+                addMessageRow(messageSent, `Control: ${action}`);
+            } else {
+                alert('WebSocket is not connected. Please wait for connection...');
+            }
+        }
+
+        function sendVote(vote) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = `vote;${vote}`;
+                ws.send(message);
+                addMessageRow(messageSent, `Vote: ${vote}`);
+            } else {
+                alert('WebSocket is not connected. Please wait for connection...');
+            }
+        }
+
+        function selectClient(client) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(`select;${client}`);
+                addMessageRow(messageSent, `Selected Client: ${client}`);
+            } else {
+                alert('WebSocket is not connected. Please wait for connection...');
+            }
+        }
+
+        function clearResponses() {
+            const responseReceived = document.getElementById('responseReceived');
+            responseReceived.innerHTML = '';
+        }
+
+        // Add enter key support for sending messages
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Connect when the page loads
+        connect();
+
+        // Clear username from localStorage when leaving (but keep userID for reconnection)
+        window.addEventListener('beforeunload', function() {
+            if (ws) {
+                ws.close();
+            }
+        });
+    </script>
+</body>
+</html> 

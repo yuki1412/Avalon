@@ -6,12 +6,6 @@ import (
 	"strings"
 )
 
-type requestHandlerModel struct {
-	id     uint32
-	action string
-	value  string
-}
-
 var (
 	missionTrue  = true
 	missionFalse = false
@@ -24,9 +18,9 @@ type Round struct {
 	RoundAssignerIndex int             `json:"round_assigner_index"`
 	MissionTracker     int             `json:"mission_tracker"`
 	MissionBoard       []*bool         `json:"mission_board"`
-	VoteList           map[uint32]bool `json:"vote_list"`
+	VoteList           map[string]bool `json:"vote_list"`
 	Status             string          `json:"status"`
-	SelectedClient     map[uint32]bool `json:"selected_client"`
+	SelectedClient     map[string]bool `json:"selected_client"`
 }
 
 func RoundInit(clients Clients) *Round {
@@ -35,8 +29,8 @@ func RoundInit(clients Clients) *Round {
 		MissionTracker: 0,
 		MissionBoard:   make([]*bool, 5),
 		Status:         "lobby",
-		VoteList:       make(map[uint32]bool),
-		SelectedClient: make(map[uint32]bool, clients.Len()),
+		VoteList:       make(map[string]bool),
+		SelectedClient: make(map[string]bool, clients.Len()),
 	}
 }
 
@@ -57,7 +51,7 @@ func (r *Round) ChangeStatus(msg string) {
 func (r *Round) ClearRecord(action string, gStatus string) {
 	r.MissionBoard = make([]*bool, 5)
 	r.MissionTracker = 0
-	r.VoteList = make(map[uint32]bool)
+	r.VoteList = make(map[string]bool)
 	r.ChangeStatus(action)
 	r.UpdateStatus(gStatus)
 }
@@ -74,7 +68,7 @@ func (r *Round) nextRound() {
 	}
 
 	r.MissionTracker++
-	r.VoteList = make(map[uint32]bool)
+	r.VoteList = make(map[string]bool)
 	r.Status = "vote"
 }
 
@@ -137,31 +131,29 @@ func (r *Round) HandlerSelectedClient(client string) string {
 	if err != nil {
 		return ""
 	}
-	_, exist := r.SelectedClient[uint32(clientID)]
+	_, exist := r.SelectedClient[string(clientID)]
 	if !exist {
-		r.SelectedClient[uint32(clientID)] = true
+		r.SelectedClient[string(clientID)] = true
 	} else {
-		delete(r.SelectedClient, uint32(clientID))
+		delete(r.SelectedClient, string(clientID))
 	}
 	return fmt.Sprintf("clientList;%s", r.GetClientList())
 }
 
 func (r *Round) GetClientList() string {
-	clientList := ""
-	for _, clientID := range r.Clients.clients {
-		val, exist := r.SelectedClient[clientID]
-		if exist {
-			clientList += fmt.Sprintf("%d;%t;", clientID, val)
-		} else {
-			clientList += fmt.Sprintf("%d;%t;", clientID, false)
-		}
+	stringList := ""
+	for _, value := range r.Clients.clients {
+		stringList += fmt.Sprintf("Client ID: %d\n", value)
 	}
-	return clientList
+	return fmt.Sprintf("Number of Players: %d\n%s", r.Clients.Len(), stringList)
 }
 
 func (r *Round) GetSystemInfo() string {
 	stringList := fmt.Sprintf("Status:%s\n", strings.ToTitle(r.Status))
 	stringList += fmt.Sprintf("GStatus:%s\n", strings.ToTitle(r.Status))
+	stringList += fmt.Sprintf("Round:%d\n", r.MissionTracker+1)
+	stringList += fmt.Sprintf("Round Assigner:%d\n", r.RoundAssigner)
+
 	for _, id := range strings.Split(r.GetClientList(), ";") {
 		if id == "true" || id == "false" {
 			continue
@@ -180,5 +172,5 @@ func (r *Round) GetSystemInfo() string {
 		missionStatus += "]\n"
 		stringList += missionStatus
 	}
-	return fmt.Sprintf("Number of Connected Clients: %d\n%s", r.Clients.Len(), stringList)
+	return fmt.Sprintf("Number of Players: %d\n%s", r.Clients.Len(), stringList)
 }
